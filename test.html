@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>棚割り提案モック - サントリー風</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --suntory-blue: #0078BD;
+      --suntory-gold: #C8A951;
+      --light-bg: #f4fafd;
+      --text-dark: #1e1e1e;
+    }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: var(--light-bg);
+      color: var(--text-dark);
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: white;
+      padding: 40px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+      margin-top: 50px;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--suntory-blue);
+      font-weight: 700;
+      margin-bottom: 30px;
+    }
+
+    h2 {
+      color: var(--suntory-blue);
+      border-left: 6px solid var(--suntory-gold);
+      padding-left: 10px;
+      margin-top: 40px;
+    }
+
+    img {
+      width: 100%;
+      border-radius: 10px;
+      margin-top: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .input-area {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 16px;
+      justify-content: flex-start;
+    }
+
+    .input-box {
+      background: #f7f9fb;
+      text-align: center;
+      border: 2px solid #d0e6f5;
+      padding: 10px;
+      border-radius: 6px;
+      width: 150px;
+      font-size: 13px;
+    }
+
+    .input-box label {
+      font-size: 13px;
+      color: #0078BD;
+      font-weight: bold;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .input-box .percent {
+      font-size: 14px;
+      font-weight: bold;
+      display: inline;
+    }
+
+    .input-box .diff {
+      font-size: 12px;
+      font-weight: bold;
+      display: inline;
+      margin-left: 5px;
+    }
+
+    .diff.plus {
+      color: #2ecc71;
+    }
+
+    .diff.minus {
+      color: #e74c3c;
+    }
+
+    .share-box {
+      margin-top: 20px;
+      background: #eaf5ff;
+      border-left: 6px solid #0078BD;
+      border-radius: 10px;
+      padding: 15px;
+      max-width: 300px;
+    }
+
+    .share-label {
+      font-size: 14px;
+      font-weight: bold;
+      color: #0078BD;
+    }
+
+    .share-value {
+      font-size: 24px;
+      font-weight: bold;
+      margin-top: 8px;
+      color: #2c3e50;
+    }
+
+    .highlight {
+      font-size: 20px;
+      font-weight: bold;
+      color: #d35400;
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    button {
+      display: block;
+      margin: 20px auto 10px auto;
+      padding: 12px 24px;
+      background-color: var(--suntory-blue);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #005f97;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+      margin-top: 60px;
+    }
+
+    .share-box.left-align {
+      margin-left: 0;
+    }
+
+    /* スピナー用 */
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 3px solid #ccc;
+      border-top: 3px solid #0078BD;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      vertical-align: middle;
+      margin-right: 10px;
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>棚割り可視化・提案モック Ver1.5</h1>
+
+    <h2>① 現状棚割り表示</h2>
+    <img src="今のビール棚割り.png" alt="棚割り画像" style="width: 600px; height: auto;">
+
+    <h2>② 現在のサブカテ構成比</h2>
+    <div class="input-area" id="currentSKU">
+      <div class="input-box"><label>クラフト</label><div class="percent">15%</div></div>
+      <div class="input-box"><label>プレミアムビール</label><div class="percent">13%</div></div>
+      <div class="input-box"><label>スタンダード</label><div class="percent">25%</div></div>
+      <div class="input-box"><label>機能性</label><div class="percent">7%</div></div>
+      <div class="input-box"><label>エコノミー</label><div class="percent">40%</div></div>
+    </div>
+
+    <h2>③ SU売上シェア予測</h2>
+    <div class="share-box left-align">
+      <div class="share-label">売上シェア予測</div>
+      <div class="share-value"><span id="currentShare">17.8</span>%</div>
+    </div>
+
+    <button onclick="showImprovement()">AI最適化を実行</button>
+
+  <!-- クルクルローディング表示 -->
+  <div id="loadingSpinner" style="display:none; margin: 20px;">
+    <span class="spinner"></span> AIが提案を生成中...
+  </div>
+
+ <!-- 改善案ブロック -->
+    <div id="improvementArea" style="display:none; margin-top: 20px;">
+    <h2>④ ゾーニング改善案</h2>
+
+      <img src="今のビール棚割り.png" alt="ゾーニング改善後棚割り" style="width: 600px; height: auto;" id="optimizedImage" style="margin-bottom: 30px;">
+
+      <div class="input-area" id="improvedSKU">
+        <div class="input-box"><label>クラフト</label><div class="percent">10%</div><div class="diff" id="diff-craft"></div></div>
+        <div class="input-box"><label>プレミアムビール</label><div class="percent">18%</div><div class="diff" id="diff-premium"></div></div>
+        <div class="input-box"><label>スタンダード</label><div class="percent">22%</div><div class="diff" id="diff-standard"></div></div>
+        <div class="input-box"><label>機能性</label><div class="percent">18%</div><div class="diff" id="diff-functional"></div></div>
+        <div class="input-box"><label>エコノミー</label><div class="percent">32%</div><div class="diff" id="diff-economy"></div></div>
+      </div>
+
+      <div class="share-box">
+        <div class="share-label">売上シェア見込み</div>
+        <div class="share-value" id="improvedShareDisplay">22.4%</div>
+      </div>
+
+      <div class="highlight" id="improvementText"></div>
+
+      <!-- チャット -->
+      <div id="chatBox" style="margin-top: 40px;">
+        <h3 style="color:#0078BD;">AIバディへの質問・要望</h3>
+        <div id="chatLog" style="background: #f9f9f9; padding: 10px; border-radius: 6px; max-height: 200px; overflow-y: auto; margin-bottom: 10px;"></div>
+        <div style="display: flex; gap: 10px;">
+          <input type="text" id="chatInput" placeholder="ご質問・要望を入力してください..." style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px;">
+          <button onclick="submitChat()" style="padding: 10px 16px; font-weight: bold; background: #0078BD; color: white; border: none; border-radius: 6px; cursor: pointer;">送信</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">© たなべ モックデザイン（試作）</div>
+
+  <script>
+function showImprovement() {
+
+      // スピナー表示、改善案非表示
+      document.getElementById("loadingSpinner").style.display = "block";
+      document.getElementById("improvementArea").style.display = "none";
+
+      // 2秒後に改善案表示
+      setTimeout(() => {
+        document.getElementById("loadingSpinner").style.display = "none";
+        document.getElementById("improvementArea").style.display = "block";
+
+
+  const improved = 22.4;
+  const current = parseFloat(document.getElementById('currentShare').textContent);
+  const diff = (improved - current).toFixed(1);
+  const sign = diff >= 0 ? "+" : "";
+  document.getElementById('improvementArea').style.display = 'block';
+  document.getElementById('improvedShareDisplay').textContent = `${improved}%（${sign}${diff}pt）`;
+  document.getElementById('improvementText').textContent = `売上シェア ${sign}${diff}pt 改善！`;
+
+  const improvedValues = {
+    "クラフト": 10,
+    "プレミアムビール": 18,
+    "スタンダード": 22,
+    "機能性": 18,
+    "エコノミー": 32
+  };
+
+  const currentBoxes = document.querySelectorAll('#currentSKU .input-box');
+  const improvedBoxes = document.querySelectorAll('#improvedSKU .input-box');
+
+  currentBoxes.forEach((box, index) => {
+    const label = box.querySelector('label').textContent.trim();
+    const currentValue = parseInt(box.querySelector('.percent').textContent.replace('%', ''));
+    const improvedValue = improvedValues[label];
+    const delta = improvedValue - currentValue;
+    const sign = delta > 0 ? "+" : (delta < 0 ? "" : "±");
+    const displayDelta = `（${sign}${delta}%）`;
+
+    const targetBox = improvedBoxes[index];
+    targetBox.querySelector('.percent').textContent = `${improvedValue}%`;
+
+    const diffElem = targetBox.querySelector('.diff');
+    diffElem.textContent = displayDelta;
+    diffElem.className = 'diff ' + (delta > 0 ? 'plus' : delta < 0 ? 'minus' : '');
+  });
+
+  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  }, 2000); // ← 2秒待つ
+}
+
+
+    function submitChat() {
+      const input = document.getElementById('chatInput');
+      const message = input.value.trim();
+      if (!message) return;
+
+      const chatLog = document.getElementById('chatLog');
+      const userBubble = document.createElement('div');
+      userBubble.textContent = message;
+      userBubble.style.background = '#e0f0ff';
+      userBubble.style.margin = '6px 0';
+      userBubble.style.padding = '8px 12px';
+      userBubble.style.borderRadius = '10px';
+      userBubble.style.maxWidth = '80%';
+      userBubble.style.alignSelf = 'flex-start';
+      userBubble.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+      chatLog.appendChild(userBubble);
+
+      let reply = "ありがとうございます。内容を確認しました。";
+      if (message.includes("クラフト")) {
+        reply = "クラフトの比率を増やすことで若年層の反応が期待されます。";
+      } else if (message.includes("案") || message.includes("パターン")) {
+        reply = "別のゾーニング案として、スタンダード比率を強調したパターンがあります。";
+      } else if (message.includes("比率")) {
+        reply = "比率の調整はカテゴリ戦略に応じて複数パターン検討可能です。";
+      }
+
+      setTimeout(() => {
+        const botBubble = document.createElement('div');
+        botBubble.textContent = reply;
+        botBubble.style.background = '#ffffff';
+        botBubble.style.margin = '6px 0';
+        botBubble.style.padding = '8px 12px';
+        botBubble.style.borderRadius = '10px';
+        botBubble.style.border = '1px solid #ccc';
+        botBubble.style.maxWidth = '80%';
+        botBubble.style.alignSelf = 'flex-end';
+        botBubble.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
+        chatLog.appendChild(botBubble);
+        chatLog.scrollTop = chatLog.scrollHeight;
+      }, 500);
+
+      input.value = '';
+    }
+  </script>
+</body>
+</html>
