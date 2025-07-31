@@ -1,4 +1,33 @@
 <!DOCTYPE html>
+<!-- password-protected.html -->
+<script>
+  const PASSWORD_HASH = "5e0c1a07153d9de847442685ecd62a499ad2c2ab8ad1368c520226fe507bf124"; // 1で生成したハッシュ
+
+  async function checkPassword() {
+    const input = document.getElementById("passwordInput").value;
+    const msg = document.getElementById("message");
+    const enc = new TextEncoder();
+    const buf = await crypto.subtle.digest("SHA-256", enc.encode(input));
+    const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+
+    if (hash === PASSWORD_HASH) {
+      document.getElementById("login").style.display = "none";
+      document.getElementById("main").style.display = "block";
+    } else {
+      msg.textContent = "パスワードが違います";
+    }
+  }
+</script>
+
+<div id="login" style="padding:20px">
+  <h2>パスワードを入力してください</h2>
+  <input type="password" id="passwordInput">
+  <button onclick="checkPassword()">ログイン</button>
+  <div id="message" style="color:red; margin-top:10px;"></div>
+</div>
+
+<div id="main" style="display:none">
+
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
@@ -264,7 +293,7 @@
       </div>
     </div>
   </div>
-
+</div>
   <div class="footer">© たなべ モックデザイン（試作）</div>
 
   <script>
